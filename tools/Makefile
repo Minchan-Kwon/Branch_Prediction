@@ -1,11 +1,10 @@
 # Tool name
-TOOL_ROOTS := sampler
+TOOL_ROOTS := branchExt
 
-# Add your CXX flags here.
+# Compiler Flags
 TOOL_CXXFLAGS := -Wall -Werror -std=c++11
 
-# This includes the dispatcher which finds the right OS-specific settings
-include ~/Downloads/pin-external-3.31-98869-gfa6f126a8-gcc-linux/source/tools/Config/makefile.config
+CONFIG_ROOT := $(PIN_ROOT)/source/tools/Config
 
-# This includes the default commands to build your tool
-include ~/Downloads/pin-external-3.31-98869-gfa6f126a8-gcc-linux/source/tools/Config/makefile.default.rules
+include include $(CONFIG_ROOT)/makefile.config
+include $(TOOLS_ROOT)/Config/makefile.default.rules
