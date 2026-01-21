@@ -38,9 +38,11 @@ make
 $PIN_ROOT/pin -t obj-intel64/branchExt.so -- /path/to/program  program_args
 ```
 
-**Description of the command line options for this sampler**
+## Usage
+**Description of the command line options**
 
 | Option | Default | Description | 
+|--------|---------|-------------|
 | -o <file> | branches.csv | Output CSV file |
 | -sampling <N> | 10 | Collect 1 in N branches |
 | -warmup <N> | 100000 | Skip the first N branches |
