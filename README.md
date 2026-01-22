@@ -27,3 +27,20 @@ source myenv/bin/activate
 
 pip install -r requirements.txt
 ```
+
+
+### Executing the Pipeline
+
+1. predict_baseline
+
+Using a 2-bit saturating counter as the baseline model, it will first print stats of the global branch history, and then make predictions on the branch history and save its predictions to the ../data directory. 
+Look at the predictions and choose the appropriate PCs the model will train on. For this project, I have used 0x and 0x and ...
+
+2. extract_branch_history
+
+Using the global branch history csv file, it will create training data and its labels with respect to the given pc. 
+
+3. Train
+
+The user should Tell the directory in which the history, target, metadata are stored
+Data is split into train, val, test and dataloader is created. 

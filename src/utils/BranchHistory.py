@@ -42,12 +42,12 @@ class BranchHistory(pd.DataFrame):
         total_not_taken = total_branches - total_taken
         taken_rate = self['taken'].mean()
 
-        print("Global Branch History Statistics")
-        print(f"Total branches executed: {total_branches:,}")
-        print(f"Unique branch PCs: {unique_pcs:,}")
-        print(f"Total taken branches: {total_taken:,}")
-        print(f"Total not-taken branches: {total_not_taken:,}")
-        print(f"Overall taken rate: {taken_rate:.2%}")
+        print("\nGlobal Branch History Statistics")
+        print(f"  Total branches executed: {total_branches:,}")
+        print(f"  Unique branch PCs: {unique_pcs:,}")
+        print(f"  Total taken branches: {total_taken:,}")
+        print(f"  Total not-taken branches: {total_not_taken:,}")
+        print(f"  Overall taken rate: {taken_rate:.2%}")
 
     def extract_branch_history(self, branch_pc, history_length, cutoff, max_history = 50000):
         '''
@@ -70,7 +70,7 @@ class BranchHistory(pd.DataFrame):
 
         if len(pc_indices) == 0:
             print(f"No branch history found for the PC 0x{branch_pc:08x}")
-            return
+            return None, None, None
 
         #Create mask for LSBs
         mask = 2 ** cutoff - 1 
@@ -99,12 +99,12 @@ class BranchHistory(pd.DataFrame):
         targets = np.array(targets, dtype=np.float32)
         vocab_size = 2 ** (cutoff + 1)
 
-        print(f"Successfully extracted {len(histories):,} training samples")
-        print(f"History length: {history_length}")
-        print(f"PC cutoff bits: {cutoff}")
-        print(f"Vocabulary size: {vocab_size}")
-        print(f"Histories shape: {histories.shape}")
-        print(f"Targets shape: {targets.shape}")
+        print(f"\nSuccessfully extracted {len(histories):,} training samples")
+        print(f"  History length: {history_length}")
+        print(f"  PC cutoff bits: {cutoff}")
+        print(f"  Vocabulary size: {vocab_size}")
+        print(f"  Histories shape: {histories.shape}")
+        print(f"  Targets shape: {targets.shape}")
 
         return histories, targets, vocab_size
 

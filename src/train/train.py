@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
+from pathlib import Path
 
 
 def train_branch_predictor(model, train_loader, val_loader,
@@ -43,7 +44,10 @@ def train_branch_predictor(model, train_loader, val_loader,
 
     best_val_accuracy = 0.0
     epochs_without_improvement = 0
-    best_model_path = f'../../run/model/{model.__class__.__name__}_best_state.pth'
+    script_path = Path(__file__).resolve().parents[2]
+    intermediate_path = script_path / 'run' / 'model'
+    intermediate_path.mkdir(parents=True, exist_ok=True)
+    best_model_path = f'{intermediate_path}/{model.__class__.__name__}_best_state.pth'
 
     print(f"Training Phase")
     print(f"  Model: {model.__class__.__name__}")

@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
+from pathlib import Path
 from torchao.quantization.qat import Int8DynActInt4WeightQATQuantizer
 
 def train_qat_model(model, train_loader, val_loader,
@@ -34,7 +35,10 @@ def train_qat_model(model, train_loader, val_loader,
 
     best_val_accuracy = 0.0
     epochs_without_improvement = 0
-    best_model_path = f'../../run/model/{model.__class__.__name__}_best_state.pth'
+    script_path = Path(__file__).resolve().parents[2]
+    intermediate_path = script_path / 'run' / 'model'
+    intermediate_path.mkdir(parents=True, exist_ok=True)
+    best_model_path = f'{intermediate_path}/{model.__class__.__name__}_quantized_best_state.pth'
 
     print(f"\n{'='*70}")
     print(f"QAT TRAINING START (groupsize={groupsize})")
