@@ -41,7 +41,8 @@ def extract_branch_history(args):
         cutoff=args.cutoff)
     
     # Save extracted history, label and metadata
-    output_dir = Path(f"./run/data/0x{args.pc:x}")
+    script_dir = Path(__file__).resolve().parent
+    output_dir = Path(f"{script_dir}/run/data/0x{args.pc:x}")
     output_dir.mkdir(parents=True, exist_ok=True)
     
     print(f"\nSaving data to {output_dir}")
@@ -56,6 +57,7 @@ def extract_branch_history(args):
         f.write(f"vocab_size: {vocab_size}\n")
         f.write(f"num_samples: {len(history_indices)}\n")
         f.write(f"batches: {args.batch}\n")
+    print(f"\nData Saved in {output_dir}. Use this as next --data_dir argument")
     
 def train(args):
     # Load history and label

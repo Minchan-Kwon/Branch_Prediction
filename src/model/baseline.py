@@ -67,7 +67,7 @@ class BaselineModel():
             self.branch_stats[branch_pc]['total'] += 1
             self.branch_stats[branch_pc]['taken' if direction == 1 else 'not-taken'] += 1
             if prediction == direction:
-                self.branch_stats['correct'] += 1
+                self.branch_stats[branch_pc]['correct'] += 1
             
             #Update state
             baseline_model.update(direction)
@@ -88,17 +88,17 @@ class BaselineModel():
         overall_accuracy = overall_correct / overall_total
 
         #Print statistics
-        print("Baseline Prediction Statistics\n")
-        print("Total Predictions: ",overall_total)
-        print("Overall Prediction Accuracy: ",overall_accuracy)
-        print("Overall Taken Rate: ",overall_taken_rate)
+        print("\nBaseline Prediction Statistics")
+        print("  Total Predictions: ",overall_total)
+        print(f"  Overall Prediction Accuracy: {overall_accuracy:2f}")
+        print(f"  Overall Taken Rate: {overall_taken_rate:.2f}")
 
         #Create DataFrame for results
         result_df = None
         if len(self.branch_stats) > 0:
             result_df = pd.DataFrame([
                 {
-                    'branch_pc': f"0x{pc:8x}",
+                    'branch_pc': f"0x{pc:08x}",
                     'total_occurrences': stats['total'],
                     'correct_predictions': stats['correct'],
                     'incorrect_predictions': stats['total'] - stats['correct'],
@@ -108,12 +108,13 @@ class BaselineModel():
                     'actual_taken_rate': stats['taken_rate']
                 }
                 for pc, stats in self.branch_stats.items()])
-            
+
         #Sort by accuracy
-        results_df = results_df.sort_values('accuracy')
+        result_df = result_df.sort_values('accuracy')
 
         #Save as CSV
-        csv_dir = Path("../../run/baseline")
+        csv_dir = Path(__file__).resolve().parents[2]
+        csv_dir = csv_dir / 'run' / 'baseline'
         csv_dir.mkdir(parents=True, exist_ok=True)
         csv_path = csv_dir / output_name
         result_df.to_csv(csv_path, index = False)
