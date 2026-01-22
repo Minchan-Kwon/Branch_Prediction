@@ -1,38 +1,29 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
+from torchao.quantization.qat import Int8DynActInt4WeightQATQuantizer
 
-
-def train_branch_predictor(model, train_loader, val_loader,
-                          num_epochs=50, learning_rate=0.001,
-                          device='cuda', patience=10):
+def train_qat_model(model, train_loader, val_loader,
+                    groupsize=32,
+                    num_epochs=80, learning_rate=0.001,
+                    device='cuda', patience=10):
     """
-    Training loop with validation and early stopping
-
-    Args:
-        model: PyTorch model
-        train_loader: DataLoader for training data
-        val_loader: DataLoader for validation data
-        num_epochs: maximum number of epochs
-        learning_rate: learning rate
-        device: 'cuda'
-        patience: early stopping patience (epochs without improvement)
-
-    Returns:
-        history: dict with training history
-        best_model_path: path to saved best model
+    QAT Training using Int8DynActInt4WeightQATQuantizer
     """
 
     model = model.to(device)
+
+    # Quantizer 생성 및 prepare
+    quantizer = Int8DynActInt4WeightQATQuantizer(groupsize=groupsize)
+    model = quantizer.prepare(model)
+
     criterion = nn.BCELoss()
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
-    #Learning rate scheduler
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(
         optimizer, mode='max', factor=0.5, patience=5
-        )
+    )
 
-    #Initialize history
     history = {
         'train_loss': [],
         'train_accuracy': [],
@@ -45,33 +36,32 @@ def train_branch_predictor(model, train_loader, val_loader,
     epochs_without_improvement = 0
     best_model_path = f'../../run/model/{model.__class__.__name__}_best_state.pth'
 
-    print(f"Training Phase")
-    print(f"  Model: {model.__class__.__name__}")
-    print(f"  Epochs: {num_epochs}")
-    print(f"  Learning rate: {learning_rate}")
-    print(f"  Batch size: {train_loader.batch_size}")
+    print(f"\n{'='*70}")
+    print(f"QAT TRAINING START (groupsize={groupsize})")
+    print(f"{'='*70}")
+    print(f"Model: {model.__class__.__name__}")
+    print(f"Device: {device}")
+    print(f"Quantization: INT8 Dynamic Activation + INT4 Weight")
+    print(f"{'='*70}\n")
 
     for epoch in range(num_epochs):
-        #Training phase
+        # Training
         model.train()
         train_loss = 0.0
         train_correct = 0
         train_total = 0
 
-        for batch_idx, (batch_histories, batch_targets) in enumerate(train_loader):
+        for batch_histories, batch_targets in train_loader:
             batch_histories = batch_histories.to(device)
             batch_targets = batch_targets.to(device)
 
-            #Forward pass
             predictions = model(batch_histories)
             loss = criterion(predictions, batch_targets)
 
-            #Backward pass
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
 
-            #Track metrics
             train_loss += loss.item()
             predicted = (predictions > 0.5).float()
             train_correct += (predicted == batch_targets).sum().item()
@@ -80,7 +70,7 @@ def train_branch_predictor(model, train_loader, val_loader,
         avg_train_loss = train_loss / len(train_loader)
         train_accuracy = train_correct / train_total
 
-        #Validation phase
+        # Validation
         model.eval()
         val_loss = 0.0
         val_correct = 0
@@ -102,7 +92,7 @@ def train_branch_predictor(model, train_loader, val_loader,
         avg_val_loss = val_loss / len(val_loader)
         val_accuracy = val_correct / val_total
 
-        #Record history
+        # Record history
         current_lr = optimizer.param_groups[0]['lr']
         history['train_loss'].append(avg_train_loss)
         history['train_accuracy'].append(train_accuracy)
@@ -110,10 +100,9 @@ def train_branch_predictor(model, train_loader, val_loader,
         history['val_accuracy'].append(val_accuracy)
         history['learning_rate'].append(current_lr)
 
-        #Learning rate scheduling
         scheduler.step(val_accuracy)
 
-        #Save best model & early stopping if needed
+        # Save best
         if val_accuracy > best_val_accuracy:
             best_val_accuracy = val_accuracy
             epochs_without_improvement = 0
@@ -123,24 +112,20 @@ def train_branch_predictor(model, train_loader, val_loader,
                 'optimizer_state_dict': optimizer.state_dict(),
                 'val_accuracy': val_accuracy,
             }, best_model_path)
-            print(f"Saved model parameters. Val Accuracy: {val_accuracy:.4f}")
+            print(f"Epoch [{epoch+1}/{num_epochs}] Val Acc: {val_accuracy:.4f}")
         else:
             epochs_without_improvement += 1
+            print(f"Epoch [{epoch+1}/{num_epochs}] Train: {train_accuracy:.4f}, Val: {val_accuracy:.4f}")
 
-        #Print epoch summary
-        print(f"Epoch [{epoch+1}/{num_epochs}]:")
-        print(f"  Train Loss: {avg_train_loss:.4f}, Train Acc: {train_accuracy:.4f}")
-        print(f"  Val Loss:   {avg_val_loss:.4f}, Val Acc:   {val_accuracy:.4f}")
-        print(f"  Best Val Acc: {best_val_accuracy:.4f}")
-        print(f"  Epochs without improvement: {epochs_without_improvement}/{patience}")
-
-        #Early stopping check
+        # Early stopping
         if epochs_without_improvement >= patience:
-            print(f"Early Stop: No improvement for {patience} epochs")
+            print(f"\nEarly stopping at epoch {epoch+1}")
             break
 
-    print(f"Training Complete")
-    print(f"Best validation accuracy: {best_val_accuracy:.4f}")
-    print(f"Best model saved to: {best_model_path}")
+    # Convert to quantized model
+    print(f"\Quantizing model")
+    model = quantizer.convert(model)
 
-    return history, best_model_path
+    print(f"\nQuantization Complete. Best Val Acc: {best_val_accuracy:.4f}\n")
+
+    return history, best_model_path, model

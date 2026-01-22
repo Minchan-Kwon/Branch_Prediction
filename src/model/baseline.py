@@ -1,3 +1,7 @@
+import pandas as pd
+from pathlib import Path 
+from collections import defaultdict
+
 class BaselineModel():
     '''
     Baseline model class for extracting H2P branches
@@ -109,8 +113,11 @@ class BaselineModel():
         results_df = results_df.sort_values('accuracy')
 
         #Save as CSV
-        result_df.to_csv(output_name, index = False)
-        print(f"Results saved as {output_name}")
+        csv_dir = Path("../../run/baseline")
+        csv_dir.mkdir(parents=True, exist_ok=True)
+        csv_path = csv_dir / output_name
+        result_df.to_csv(csv_path, index = False)
+        print(f"Results saved to {csv_path}")
 
     #Prints stats for a given PC
     def print_branch_stats(self, branch_pc):
