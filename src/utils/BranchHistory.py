@@ -1,3 +1,6 @@
+import pandas as pd
+import numpy as np
+
 class BranchHistory(pd.DataFrame):
     '''
     Class for a branch history dataframe
@@ -11,6 +14,7 @@ class BranchHistory(pd.DataFrame):
         return BranchHistory
 
     def __init__(self, *args, **kwargs):
+        self._csv_path = kwargs.pop('csv_path', None)
         super().__init__(*args, **kwargs)
     
     @classmethod
