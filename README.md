@@ -1,4 +1,4 @@
-# Branch_Prediction
+# Branch Prediction through AI
 
 This repository contains the necessary source code to collect data, train and test a neural branch predictor. 
 For this project, the open-source PARSEC benchmark suite has been used. However, this choice is arbitrary and 
