@@ -81,7 +81,7 @@ python run_pipeline.py extract_branch_history --csv <Path/to/CSV> --pc <hex> \
 **3. train**
 
 ```
-python run_pipeline.py predict_baseline --data_dir <Directory/to/data_folder> --model <str> \
+python run_pipeline.py train --data_dir <Directory/to/data_folder> --model <str> \
                        --epoch <int> --lr <float> --device <str> --patience <int>
 ```
 
@@ -94,7 +94,7 @@ python run_pipeline.py predict_baseline --data_dir <Directory/to/data_folder> --
 **4. qtrain**
 
 ```
-python run_pipeline.py predict_baseline --data_dir <Directory/to/data_folder> --model <str> \
+python run_pipeline.py qtrain --data_dir <Directory/to/data_folder> --model <str> \
                        --epoch <int> --lr <float> --device <str> --patience <int>
 ```
 
